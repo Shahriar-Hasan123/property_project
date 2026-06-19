@@ -5,16 +5,18 @@ services:
       context: .
       dockerfile: docker/Dockerfile.postgres
     container_name: property_postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: propertydb
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5442:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,20 +26,20 @@ services:
       context: .
       dockerfile: docker/Dockerfile.django
     container_name: property_django
+    user: "${USER_ID}:${GROUP_ID}"
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - app_volume:/app
+      - media_volume:/app/media
     ports:
       - "8000:8000"
-    environment:
-      - DB_NAME=propertydb
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=postgres
-      - DB_PORT=5432
+    env_file:
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   postgres_data:
+  app_volume:
+  media_volume:

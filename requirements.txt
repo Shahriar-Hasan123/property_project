@@ -5,3 +5,4 @@ pgvector==0.3.6
 Pillow==11.1.0
 django-filter==24.3
 pandas==2.2.3
+python-dotenv==1.0.1
