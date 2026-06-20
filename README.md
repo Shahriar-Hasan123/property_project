@@ -35,73 +35,82 @@ property_project/
 └── db.sqlite3             # SQLite database (development only)
 ```
 
-## Setup Instructions
+## Installation & Setup
 
-### 1. Clone the Repository
+### Prerequisites
+
+- Docker & Docker Compose installed ([Install Docker](https://docs.docker.com/get-docker/))
+
+### Step 1: Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd property_project
 ```
 
-### 2. Create `.env` File
+### Step 2: Create `.env` File
 
-Copy the example environment variables:
-
-```bash
-cp .env.example .env  # or create manually
-```
-
-**`.env` file contents:**
+Create a `.env` file in the project root:
 
 ```env
-# User/Group IDs (for Docker file ownership)
 USER_ID=1000
 GROUP_ID=1000
 
-# Django
 SECRET_KEY=django-insecure-change-this-to-a-real-secret-key-in-production
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
-# Database
 DB_NAME=propertydb
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=postgres
 DB_PORT=5432
 
-# Media
 MEDIA_URL=/media/
 ```
 
-### 3. Build Docker Images
+### Step 3: Build & Start Containers
 
 ```bash
 docker compose build
+docker compose up -d postgres
+sleep 5
+docker compose up -d django
 ```
 
-### 4. Run Containers
+### Step 4: Run Migrations
 
 ```bash
-docker-compose up
+docker compose exec django python manage.py migrate
 ```
 
-**Note:** The `USER_ID` and `GROUP_ID` are already configured in `.env`, so no extra environment variables are needed!
-
-### 5. Run Migrations (First Time Only)
-
-In a new terminal:
+### Step 5: Create Superuser (Optional)
 
 ```bash
-docker exec property_django python manage.py migrate
+docker compose exec -it django python manage.py createsuperuser
 ```
 
-### 6. Create Superuser (First Time Only)
+### Access the Application
 
+- **Django:** http://localhost:8000
+- **Admin:** http://localhost:8000/admin
+- **PostgreSQL:** localhost:5442
+
+---
+
+## Important Notes for Fresh Clones
+
+**Always run on first clone:**
 ```bash
-docker exec -it property_django python manage.py createsuperuser
+docker compose down -v
+docker compose build
+docker compose up -d postgres
+sleep 5
+docker compose up -d django
+docker compose exec django python manage.py migrate
 ```
+
+This ensures the `postgis` and `vector` extensions are created in a fresh database.
 
 ## Access the Application
 
@@ -112,35 +121,25 @@ docker exec -it property_django python manage.py createsuperuser
 ## Common Commands
 
 ```bash
-# Build images
-docker compose build
-
-# Start containers
-docker-compose up
-
-# Stop containers
+# Start/stop containers
+docker compose up -d
 docker compose down
 
-# View logs
+# Logs
 docker compose logs -f django
 
-# Run Django management commands
-docker exec property_django python manage.py <command>
+# Database migrations
+docker compose exec django python manage.py migrate
+docker compose exec django python manage.py makemigrations
 
-# Open Django shell
-docker exec -it property_django python manage.py shell
-
-# Create migrations
-docker exec property_django python manage.py makemigrations
-
-# Apply migrations
-docker exec property_django python manage.py migrate
+# Django shell
+docker compose exec -it django python manage.py shell
 
 # Create superuser
-docker exec -it property_django python manage.py createsuperuser
+docker compose exec -it django python manage.py createsuperuser
 
-# Collect static files
-docker exec property_django python manage.py collectstatic --noinput
+# Access PostgreSQL
+docker compose exec postgres psql -U postgres -d propertydb
 ```
 
 ## File Ownership Issues
@@ -201,19 +200,13 @@ Before deploying to production:
 
 ## Troubleshooting
 
-### Containers not starting?
-- Check logs: `docker compose logs`
-- Ensure ports 5442 and 8000 are available
-- Verify `.env` file exists
-
-### Database connection errors?
-- Ensure PostgreSQL container is healthy: `docker compose ps`
-- Check database credentials in `.env`
-- Wait for PostgreSQL to be ready before running migrations
-
-### Permission denied errors?
-- Always use: `USER_ID=$(id -u) GROUP_ID=$(id -g) docker-compose up`
-- Fix existing files: `docker run --rm -v $PWD:/project alpine sh -c "chown -R 1000:1000 /project"`
+| Issue | Solution |
+|-------|----------|
+| `permission denied` docker socket | `sudo usermod -aG docker $USER && newgrp docker` |
+| Container logs | `docker compose logs <service-name>` |
+| Full reset (clears DB) | `docker compose down -v && docker compose build && docker compose up -d` |
+| Django migrations fail | Ensure PostgreSQL is healthy: `docker compose ps` |
+| Changes not reflected | Restart container: `docker compose restart django` |
 
 ## Support
 
