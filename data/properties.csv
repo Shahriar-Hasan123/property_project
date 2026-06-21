@@ -1,0 +1,6 @@
+title,description,property_type,status,price,bedrooms,bathrooms,area_sqft,address,city,state,country,latitude,longitude
+King's Castle Beach House,Luxury beach house with private pool,villa,available,450.00,6,4,3200.00,123 Beach Rd,Destin,Florida,USA,30.3935,-86.4958
+Cozy Mountain Cabin,Peaceful cabin with mountain views,cabin,available,120.00,2,1,800.00,45 Pine Ave,Asheville,North Carolina,USA,35.5951,-82.5515
+Downtown Studio Apartment,Modern studio in city center,studio,available,85.00,0,1,450.00,789 Main St,Miami,Florida,USA,25.7617,-80.1918
+Oceanfront Villa,Stunning ocean views and private beach,villa,available,800.00,5,5,4500.00,1 Ocean Drive,Miami Beach,Florida,USA,25.7907,-80.1300
+Family Cottage,Spacious cottage perfect for families,cottage,available,200.00,4,2,1800.00,22 Oak Lane,Nashville,Tennessee,USA,36.1627,-86.7816
