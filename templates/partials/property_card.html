@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="col-12 col-sm-6 col-lg-4">
+    <div class="property-card card h-100">
+
+        <!-- Image -->
+        <div class="img-wrapper">
+            {% with primary_image=property.images.filter.first %}
+                {% if property.images.exists %}
+                    <img
+                        src="{{ property.images.first.image.url }}"
+                        class="card-img-top"
+                        alt="{{ property.images.first.alt_text|default:property.title }}"
+                        loading="lazy"
+                    />
+                {% else %}
+                    <img
+                        src="{% static 'images/placeholder.svg' %}"
+                        class="card-img-top"
+                        alt="No image available"
+                        loading="lazy"
+                    />
+                {% endif %}
+            {% endwith %}
+            <span class="badge-type">{{ property.property_type }}</span>
+            {% if property.is_featured %}
+                <span class="badge-featured">
+                    <i class="bi bi-star-fill me-1"></i>Featured
+                </span>
+            {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="card-body d-flex flex-column">
+            <div class="property-price">
+                ${{ property.price|floatformat:0 }}
+                <span>/ night</span>
+            </div>
+            <h5 class="property-title" title="{{ property.title }}">
+                {{ property.title }}
+            </h5>
+            <p class="property-location mb-auto">
+                <i class="bi bi-geo-alt me-1"></i>
+                {{ property.location.city }}, {{ property.location.state }}
+            </p>
+
+            <!-- Meta -->
+            <div class="property-meta">
+                <div class="meta-item">
+                    <i class="bi bi-door-open"></i>
+                    {{ property.bedrooms }} bd
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-droplet"></i>
+                    {{ property.bathrooms }} ba
+                </div>
+                {% if property.area_sqft %}
+                <div class="meta-item">
+                    <i class="bi bi-aspect-ratio"></i>
+                    {{ property.area_sqft|floatformat:0 }} sqft
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Button -->
+            <a
+                href="{% url 'property_detail' property.slug %}"
+                class="btn btn-outline-primary btn-sm mt-3 w-100"
+            >
+                View Details
+            </a>
+        </div>
+    </div>
+</div>

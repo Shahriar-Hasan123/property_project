@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}StayFinder — Find Your Perfect Vacation Rental{% endblock %}
+{% block meta_description %}Search thousands of vacation rentals by location, type, and price.{% endblock %}
+
+{% block content %}
+
+<!-- ─── Hero Section ─── -->
+<section class="hero-section">
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+
+            <!-- Left: Text -->
+            <div class="col-12 col-lg-6">
+                <div class="hero-badge">
+                    <i class="bi bi-stars me-1"></i>
+                    Trusted by thousands of travelers
+                </div>
+                <h1 class="hero-title mb-3">
+                    Find Your Perfect<br />
+                    <span>Vacation Rental</span>
+                </h1>
+                <p class="hero-subtitle mb-4">
+                    Discover thousands of handpicked vacation homes, villas,
+                    cabins, and more — all in one place.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'property_list' %}" class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-search me-2"></i>Browse All
+                    </a>
+                    <a href="#featured" class="btn btn-outline-light px-4 py-2">
+                        <i class="bi bi-star me-2"></i>Featured
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Search Box -->
+            <div class="col-12 col-lg-6">
+                <div class="search-box">
+                    <h5 class="text-white fw-700 mb-4">
+                        <i class="bi bi-search me-2"></i>Search Properties
+                    </h5>
+                    <form action="{% url 'property_list' %}" method="GET">
+
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label for="search">Location</label>
+                            <input
+                                type="text"
+                                id="search"
+                                name="search"
+                                class="form-control"
+                                placeholder="City, state or country..."
+                                autocomplete="off"
+                            />
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <!-- Property Type -->
+                            <div class="col-12 col-sm-6">
+                                <label for="property_type">Property Type</label>
+                                <select name="property_type" id="property_type" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="house">House</option>
+                                    <option value="apartment">Apartment</option>
+                                    <option value="villa">Villa</option>
+                                    <option value="cabin">Cabin</option>
+                                    <option value="condo">Condo</option>
+                                    <option value="cottage">Cottage</option>
+                                    <option value="studio">Studio</option>
+                                </select>
+                            </div>
+
+                            <!-- Bedrooms -->
+                            <div class="col-12 col-sm-6">
+                                <label for="bedrooms">Bedrooms</label>
+                                <select name="bedrooms" id="bedrooms" class="form-select">
+                                    <option value="">Any</option>
+                                    <option value="1">1+</option>
+                                    <option value="2">2+</option>
+                                    <option value="3">3+</option>
+                                    <option value="4">4+</option>
+                                    <option value="5">5+</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Max Price -->
+                        <div class="mb-4">
+                            <label for="max_price">Max Price (per night)</label>
+                            <input
+                                type="number"
+                                id="max_price"
+                                name="max_price"
+                                class="form-control"
+                                placeholder="e.g. 500"
+                                min="0"
+                            />
+                        </div>
+
+                        <button type="submit" class="btn-search">
+                            <i class="bi bi-search me-2"></i>Search Properties
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar mt-5 rounded-3 px-3">
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_properties }}+</div>
+                        <div class="stat-label">Properties</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_locations }}+</div>
+                        <div class="stat-label">Locations</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Verified</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ─── Featured Properties ─── -->
+<section class="py-5 py-lg-6" id="featured">
+    <div class="container">
+
+        <div class="text-center mb-5">
+            <h2 class="section-title">Featured Properties</h2>
+            <p class="section-subtitle">Handpicked top vacation rentals just for you</p>
+        </div>
+
+        {% if featured_properties %}
+            <div class="row g-4">
+                {% for property in featured_properties %}
+                    {% include "partials/property_card.html" %}
+                {% endfor %}
+            </div>
+            <div class="text-center mt-5">
+                <a href="{% url 'property_list' %}" class="btn btn-primary px-5 py-2">
+                    View All Properties <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="no-results">
+                <i class="bi bi-houses d-block"></i>
+                <p>No featured properties yet.</p>
+                <a href="{% url 'property_list' %}" class="btn btn-outline-primary">
+                    Browse All Properties
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- ─── Property Types ─── -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Browse by Type</h2>
+            <p class="section-subtitle">Find exactly what you're looking for</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            {% for type_key, type_label, icon in property_types %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <a href="{% url 'property_list' %}?property_type={{ type_key }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm text-center p-3 h-100 rounded-3 type-card">
+                        <div class="fs-2 mb-2">{{ icon }}</div>
+                        <div class="fw-600 text-dark small">{{ type_label }}</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
