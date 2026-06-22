@@ -1,5 +1,287 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Properties — StayFinder{% endblock %}
+{% block meta_description %}Browse all vacation rental properties. Filter by type, bedrooms, and price.{% endblock %}
 
 {% block content %}
-    <p class="p-5">Property list coming soon.</p>
+
+<!-- ─── Page Header ─── -->
+<section class="py-4 border-bottom bg-light">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md-6">
+                <h1 class="fs-3 fw-700 mb-0">
+                    {% if search %}
+                        Results for "{{ search }}"
+                    {% else %}
+                        All Properties
+                    {% endif %}
+                </h1>
+                <p class="text-muted small mb-0 mt-1">
+                    {{ total_count }} propert{{ total_count|pluralize:"y,ies" }} found
+                </p>
+            </div>
+            <!-- Sort -->
+            <div class="col-12 col-md-6">
+                <form method="GET" id="sortForm">
+                    <!-- Preserve existing filters when sorting -->
+                    {% if search %}<input type="hidden" name="search" value="{{ search }}" />{% endif %}
+                    {% if property_type %}<input type="hidden" name="property_type" value="{{ property_type }}" />{% endif %}
+                    {% if bedrooms %}<input type="hidden" name="bedrooms" value="{{ bedrooms }}" />{% endif %}
+                    {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}" />{% endif %}
+                    {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}" />{% endif %}
+
+                    <div class="d-flex align-items-center gap-2 justify-content-md-end">
+                        <label class="text-muted small mb-0 text-nowrap">Sort by:</label>
+                        <select
+                            name="sort_by"
+                            class="form-select form-select-sm w-auto"
+                            onchange="document.getElementById('sortForm').submit()"
+                        >
+                            <option value="newest"    {% if sort_by == "newest" %}selected{% endif %}>Newest</option>
+                            <option value="price_asc" {% if sort_by == "price_asc" %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price_desc"{% if sort_by == "price_desc" %}selected{% endif %}>Price: High to Low</option>
+                            <option value="oldest"    {% if sort_by == "oldest" %}selected{% endif %}>Oldest</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Active Filter Badges -->
+        {% if active_filters %}
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="text-muted small me-1 align-self-center">Active filters:</span>
+            {% if search %}
+                <span class="badge rounded-pill bg-primary">
+                    <i class="bi bi-search me-1"></i>{{ search }}
+                    <a href="?{% for k,v in active_filters.items %}{% if k != 'search' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">×</a>
+                </span>
+            {% endif %}
+            {% if property_type %}
+                <span class="badge rounded-pill bg-secondary text-capitalize">
+                    {{ property_type }}
+                    <a href="?{% for k,v in active_filters.items %}{% if k != 'property_type' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">×</a>
+                </span>
+            {% endif %}
+            {% if bedrooms %}
+                <span class="badge rounded-pill bg-secondary">
+                    {{ bedrooms }}+ Bedrooms
+                    <a href="?{% for k,v in active_filters.items %}{% if k != 'bedrooms' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">×</a>
+                </span>
+            {% endif %}
+            {% if max_price %}
+                <span class="badge rounded-pill bg-secondary">
+                    Max ${{ max_price }}
+                    <a href="?{% for k,v in active_filters.items %}{% if k != 'max_price' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">×</a>
+                </span>
+            {% endif %}
+            <a href="{% url 'property_list' %}" class="badge rounded-pill bg-danger text-decoration-none">
+                <i class="bi bi-x me-1"></i>Clear All
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ─── Main Content ─── -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- ── Sidebar Filters ─── -->
+            <div class="col-12 col-lg-3">
+
+                <!-- Mobile: Toggle Button -->
+                <button
+                    class="btn btn-outline-primary w-100 mb-3 d-lg-none"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#filterSidebar"
+                >
+                    <i class="bi bi-funnel me-2"></i>Filters
+                </button>
+
+                <div class="collapse d-lg-block" id="filterSidebar">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h6 class="fw-700 mb-0">
+                                    <i class="bi bi-funnel me-2 text-primary"></i>Filters
+                                </h6>
+                                {% if active_filters %}
+                                    <a href="{% url 'property_list' %}" class="text-danger small">Clear all</a>
+                                {% endif %}
+                            </div>
+
+                            <form method="GET" action="{% url 'property_list' %}">
+
+                                <!-- Search -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-600 small">Search</label>
+                                    <input
+                                        type="text"
+                                        name="search"
+                                        class="form-control form-control-sm"
+                                        placeholder="Location, title..."
+                                        value="{{ search }}"
+                                    />
+                                </div>
+
+                                <!-- Property Type -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-600 small">Property Type</label>
+                                    <select name="property_type" class="form-select form-select-sm">
+                                        <option value="">All Types</option>
+                                        {% for value, label in property_type_choices %}
+                                            <option
+                                                value="{{ value }}"
+                                                {% if property_type == value %}selected{% endif %}
+                                            >
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Bedrooms -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-600 small">Bedrooms</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for num in "12345" %}
+                                            <input
+                                                type="radio"
+                                                class="btn-check"
+                                                name="bedrooms"
+                                                id="bed{{ num }}"
+                                                value="{{ num }}"
+                                                {% if bedrooms == num %}checked{% endif %}
+                                            />
+                                            <label class="btn btn-outline-secondary btn-sm" for="bed{{ num }}">
+                                                {{ num }}+
+                                            </label>
+                                        {% endfor %}
+                                        <input type="radio" class="btn-check" name="bedrooms" id="bedAny" value="" {% if not bedrooms %}checked{% endif %} />
+                                        <label class="btn btn-outline-secondary btn-sm" for="bedAny">Any</label>
+                                    </div>
+                                </div>
+
+                                <!-- Price Range -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-600 small">Price Range (per night)</label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <input
+                                                type="number"
+                                                name="min_price"
+                                                class="form-control form-control-sm"
+                                                placeholder="Min $"
+                                                value="{{ min_price }}"
+                                                min="0"
+                                            />
+                                        </div>
+                                        <div class="col-6">
+                                            <input
+                                                type="number"
+                                                name="max_price"
+                                                class="form-control form-control-sm"
+                                                placeholder="Max $"
+                                                value="{{ max_price }}"
+                                                min="0"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-search me-2"></i>Apply Filters
+                                </button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Property Grid ─── -->
+            <div class="col-12 col-lg-9">
+
+                {% if page_obj.object_list %}
+                    <div class="row g-4">
+                        {% for property in page_obj %}
+                            {% include "partials/property_card.html" %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav class="mt-5" aria-label="Property pagination">
+                        <ul class="pagination justify-content-center gap-1">
+
+                            <!-- Previous -->
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    
+                                        class="page-link rounded-2"
+                                        href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}"
+                                    >
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <!-- Page Numbers -->
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link rounded-2">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                                    <li class="page-item">
+                                        
+                                            class="page-link rounded-2"
+                                            href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}"
+                                        >
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- Next -->
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    
+                                        class="page-link rounded-2"
+                                        href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}"
+                                    >
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+                        <p class="text-center text-muted small mt-2">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </p>
+                    </nav>
+                    {% endif %}
+
+                {% else %}
+                    <!-- No results -->
+                    <div class="no-results py-5">
+                        <i class="bi bi-search d-block fs-1 text-muted mb-3"></i>
+                        <h5 class="fw-600">No properties found</h5>
+                        <p class="text-muted">Try adjusting your filters or search term.</p>
+                        <a href="{% url 'property_list' %}" class="btn btn-outline-primary mt-2">
+                            <i class="bi bi-arrow-left me-2"></i>Clear Filters
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

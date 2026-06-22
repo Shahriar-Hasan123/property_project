@@ -1,9 +1,16 @@
 from django.shortcuts import render
 from .models import Property, Location
+from django.db.models import Q
+from django.core.paginator import Paginator
+
 
 # Create your views here.
 def home(request):
-    featured_properties = Property.objects.filter(is_featured=True, is_active=True).select_related("location").prefetch_related("images")[:6]
+    featured_properties = (
+        Property.objects.filter(is_featured=True, is_active=True)
+        .select_related("location")
+        .prefetch_related("images")[:6]
+    )
     total_properties = Property.objects.filter(is_active=True).count()
     total_locations = Location.objects.filter(is_active=True).count()
 
@@ -26,8 +33,108 @@ def home(request):
     }
     return render(request, "home.html", context)
 
+
 def property_list(request):
-    return render(request,"property_list.html")
+    # Start with all active properties
+    queryset = Property.objects.filter(is_active=True).select_related("location").prefetch_related("images").order_by("-created_at")
+
+    # Read filter values from URL
+    search       = request.GET.get("search", "").strip()
+    property_type = request.GET.get("property_type", "").strip()
+    bedrooms     = request.GET.get("bedrooms", "").strip()
+    max_price    = request.GET.get("max_price", "").strip()
+    min_price    = request.GET.get("min_price", "").strip()
+    sort_by      = request.GET.get("sort_by", "newest").strip()
+
+    # Apply search filter
+    if search:
+        queryset = queryset.filter(
+            Q(title__icontains=search) |
+            Q(description__icontains=search) |
+            Q(address__icontains=search) |
+            Q(location__city__icontains=search) |
+            Q(location__state__icontains=search) |
+            Q(location__country__icontains=search)
+        )
+
+    # Apply property type filter
+    if property_type:
+        queryset = queryset.filter(property_type=property_type)
+
+    # Apply bedrooms filter
+    if bedrooms:
+        try:
+            queryset = queryset.filter(bedrooms__gte=int(bedrooms))
+        except ValueError:
+            pass
+
+    # Apply price filters
+    if min_price:
+        try:
+            queryset = queryset.filter(price__gte=float(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            queryset = queryset.filter(price__lte=float(max_price))
+        except ValueError:
+            pass
+
+    # Apply sorting
+    sort_options = {
+        "newest":    "-created_at",
+        "oldest":    "created_at",
+        "price_asc":  "price",
+        "price_desc": "-price",
+    }
+    order_field = sort_options.get(sort_by, "-created_at")
+    queryset = queryset.order_by(order_field)
+
+    # ── Pagination ─────────────────────────────────────────
+    # Show 9 properties per page (3x3 grid)
+    paginator = Paginator(queryset, 9)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # ── Build active filters dict for template ─────────────
+    # Used to show "Active Filters" badges and keep filters
+    # when paginating (preserve filters in pagination links)
+    active_filters = {}
+    if search:
+        active_filters["search"] = search
+    if property_type:
+        active_filters["property_type"] = property_type
+    if bedrooms:
+        active_filters["bedrooms"] = bedrooms
+    if min_price:
+        active_filters["min_price"] = min_price
+    if max_price:
+        active_filters["max_price"] = max_price
+    if sort_by and sort_by != "newest":
+        active_filters["sort_by"] = sort_by
+
+    # Build query string for pagination links
+    # e.g. "search=Miami&property_type=villa"
+    filter_params = "&".join(
+        f"{k}={v}" for k, v in active_filters.items()
+    )
+
+    context = {
+        "page_obj": page_obj,
+        "total_count": paginator.count,
+        "search": search,
+        "property_type": property_type,
+        "bedrooms": bedrooms,
+        "min_price": min_price,
+        "max_price": max_price,
+        "sort_by": sort_by,
+        "active_filters": active_filters,
+        "filter_params": filter_params,
+        "property_type_choices": Property.PROPERTY_TYPE_CHOICES,
+    }
+    return render(request, "property_list.html", context)
+
 
 def property_detail(request):
     return render(request, "property_detail.html")
