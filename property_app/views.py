@@ -2,6 +2,9 @@ from django.shortcuts import render
 from .models import Property, Location
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.measure import D
 
 
 # Create your views here.
@@ -36,25 +39,30 @@ def home(request):
 
 def property_list(request):
     # Start with all active properties
-    queryset = Property.objects.filter(is_active=True).select_related("location").prefetch_related("images").order_by("-created_at")
+    queryset = (
+        Property.objects.filter(is_active=True)
+        .select_related("location")
+        .prefetch_related("images")
+        .order_by("-created_at")
+    )
 
     # Read filter values from URL
-    search       = request.GET.get("search", "").strip()
+    search = request.GET.get("search", "").strip()
     property_type = request.GET.get("property_type", "").strip()
-    bedrooms     = request.GET.get("bedrooms", "").strip()
-    max_price    = request.GET.get("max_price", "").strip()
-    min_price    = request.GET.get("min_price", "").strip()
-    sort_by      = request.GET.get("sort_by", "newest").strip()
+    bedrooms = request.GET.get("bedrooms", "").strip()
+    max_price = request.GET.get("max_price", "").strip()
+    min_price = request.GET.get("min_price", "").strip()
+    sort_by = request.GET.get("sort_by", "newest").strip()
 
     # Apply search filter
     if search:
         queryset = queryset.filter(
-            Q(title__icontains=search) |
-            Q(description__icontains=search) |
-            Q(address__icontains=search) |
-            Q(location__city__icontains=search) |
-            Q(location__state__icontains=search) |
-            Q(location__country__icontains=search)
+            Q(title__icontains=search)
+            | Q(description__icontains=search)
+            | Q(address__icontains=search)
+            | Q(location__city__icontains=search)
+            | Q(location__state__icontains=search)
+            | Q(location__country__icontains=search)
         )
 
     # Apply property type filter
@@ -83,9 +91,9 @@ def property_list(request):
 
     # Apply sorting
     sort_options = {
-        "newest":    "-created_at",
-        "oldest":    "created_at",
-        "price_asc":  "price",
+        "newest": "-created_at",
+        "oldest": "created_at",
+        "price_asc": "price",
         "price_desc": "-price",
     }
     order_field = sort_options.get(sort_by, "-created_at")
@@ -116,9 +124,7 @@ def property_list(request):
 
     # Build query string for pagination links
     # e.g. "search=Miami&property_type=villa"
-    filter_params = "&".join(
-        f"{k}={v}" for k, v in active_filters.items()
-    )
+    filter_params = "&".join(f"{k}={v}" for k, v in active_filters.items())
 
     context = {
         "page_obj": page_obj,
@@ -136,5 +142,38 @@ def property_list(request):
     return render(request, "property_list.html", context)
 
 
-def property_detail(request):
-    return render(request, "property_detail.html")
+def property_detail(request, slug):
+
+    property = get_object_or_404(
+        Property.objects.select_related("location")
+                        .prefetch_related("images"),
+        slug=slug,
+        is_active=True
+    )
+
+    # Calculate distance from city center 
+    distance_from_city = None
+
+    if property.point and property.location.point:
+        property_with_distance = Property.objects.filter(
+            pk=property.pk
+        ).annotate(
+            distance=Distance("point", property.location.point)
+        ).first()
+
+        if property_with_distance:
+            # .m gives distance in meters → convert to km
+            distance_km = property_with_distance.distance.m / 1000
+            distance_from_city = round(distance_km, 2)
+
+    #Get all images
+    images = property.images.all().order_by("sort_order", "-is_primary")
+    primary_image = images.filter(is_primary=True).first() or images.first()
+
+    context = {
+        "property": property,
+        "images": images,
+        "primary_image": primary_image,
+        "distance_from_city": distance_from_city,
+    }
+    return render(request, "property_detail.html", context)

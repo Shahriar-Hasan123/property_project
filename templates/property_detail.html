@@ -1,4 +1,299 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ property.title }} — HavenStay{% endblock %}
+{% block meta_description %}{{ property.description|truncatewords:30 }}{% endblock %}
+
 {% block content %}
-<p class="p-5">Property detail coming soon.</p>
+
+<!-- Breadcrumb -->
+<section class="py-3 border-bottom bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'property_list' %}">Properties</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'property_list' %}?search={{ property.location.city }}">
+                        {{ property.location.city }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ property.title|truncatewords:5 }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!--  Main Content  -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- Left Column: Images + Details -->
+            <div class="col-12 col-lg-8">
+
+                <!-- Property Title (mobile) -->
+                <div class="d-lg-none mb-4">
+                    <span class="badge bg-primary text-capitalize mb-2">
+                        {{ property.property_type }}
+                    </span>
+                    <h1 class="fs-3 fw-700">{{ property.title }}</h1>
+                    <p class="text-muted">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        {{ property.address|default:property.location.city }},
+                        {{ property.location.state }},
+                        {{ property.location.country }}
+                    </p>
+                </div>
+
+                <!-- Image Gallery -->
+                {% if images %}
+                <div class="mb-4">
+
+                    <!-- Main Image -->
+                    <div class="main-image-wrapper rounded-3 overflow-hidden mb-2"
+                         style="height: 420px;">
+                        <img
+                            src="{{ primary_image.image.url }}"
+                            class="w-100 h-100 object-fit-cover"
+                            alt="{{ primary_image.alt_text|default:property.title }}"
+                            id="mainImage"
+                        />
+                    </div>
+
+                    <!-- Thumbnail Strip -->
+                    {% if images.count > 1 %}
+                    <div class="d-flex gap-2 overflow-auto pb-1">
+                        {% for img in images %}
+                        <div
+                            class="thumbnail-item flex-shrink-0 rounded-2 overflow-hidden"
+                            style="width: 90px; height: 70px; cursor: pointer;"
+                            onclick="document.getElementById('mainImage').src='{{ img.image.url }}'"
+                        >
+                            <img
+                                src="{{ img.image.url }}"
+                                class="w-100 h-100 object-fit-cover"
+                                alt="{{ img.alt_text|default:property.title }}"
+                                loading="lazy"
+                            />
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% else %}
+                <!-- No images placeholder -->
+                <div
+                    class="rounded-3 bg-light d-flex align-items-center
+                           justify-content-center mb-4"
+                    style="height: 420px;"
+                >
+                    <div class="text-center text-muted">
+                        <i class="bi bi-image fs-1 d-block mb-2"></i>
+                        No images available
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Description -->
+                {% if property.description %}
+                <div class="mb-4">
+                    <h4 class="fw-700 mb-3">About this property</h4>
+                    <p class="text-muted lh-lg">{{ property.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Property Details Grid -->
+                <div class="mb-4">
+                    <h4 class="fw-700 mb-3">Property Details</h4>
+                    <div class="row g-3">
+
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-door-open fs-4 text-primary mb-2 d-block"></i>
+                                <div class="fw-700 fs-5">{{ property.bedrooms }}</div>
+                                <div class="text-muted small">Bedroom{{ property.bedrooms|pluralize }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-droplet fs-4 text-primary mb-2 d-block"></i>
+                                <div class="fw-700 fs-5">{{ property.bathrooms }}</div>
+                                <div class="text-muted small">Bathroom{{ property.bathrooms|pluralize }}</div>
+                            </div>
+                        </div>
+
+                        {% if property.area_sqft %}
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-aspect-ratio fs-4 text-primary mb-2 d-block"></i>
+                                <div class="fw-700 fs-5">{{ property.area_sqft|floatformat:0 }}</div>
+                                <div class="text-muted small">Sq Ft</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-house fs-4 text-primary mb-2 d-block"></i>
+                                <div class="fw-700 fs-5 text-capitalize">{{ property.property_type }}</div>
+                                <div class="text-muted small">Property Type</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-check-circle fs-4 text-success mb-2 d-block"></i>
+                                <div class="fw-700 fs-5 text-capitalize">{{ property.status }}</div>
+                                <div class="text-muted small">Status</div>
+                            </div>
+                        </div>
+
+                        {% if distance_from_city is not None %}
+                        <div class="col-6 col-sm-4">
+                            <div class="detail-card text-center p-3 rounded-3 bg-light">
+                                <i class="bi bi-geo fs-4 text-primary mb-2 d-block"></i>
+                                <div class="fw-700 fs-5">{{ distance_from_city }} km</div>
+                                <div class="text-muted small">From City Center</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <!-- Location Info -->
+                <div class="mb-4">
+                    <h4 class="fw-700 mb-3">Location</h4>
+                    <div class="card border-0 bg-light rounded-3 p-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-geo-alt-fill fs-4 text-primary mt-1"></i>
+                            <div>
+                                <div class="fw-600">{{ property.location.name }}</div>
+                                {% if property.address %}
+                                    <div class="text-muted small">{{ property.address }}</div>
+                                {% endif %}
+                                <div class="text-muted small">
+                                    {{ property.location.city }},
+                                    {{ property.location.state }},
+                                    {{ property.location.country }}
+                                </div>
+                                {% if distance_from_city is not None %}
+                                <div class="mt-2">
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill">
+                                        <i class="bi bi-signpost me-1"></i>
+                                        {{ distance_from_city }} km from {{ property.location.city }} center
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!--  Right Column: Booking Card -->
+            <div class="col-12 col-lg-4">
+                <div class="sticky-top" style="top: 80px;">
+                    <div class="card border-0 shadow rounded-3">
+                        <div class="card-body p-4">
+
+                            <!-- Price -->
+                            <div class="mb-4">
+                                <div class="fs-2 fw-800 text-primary">
+                                    ${{ property.price|floatformat:0 }}
+                                    <span class="fs-6 fw-400 text-muted">/ night</span>
+                                </div>
+                                {% if property.is_featured %}
+                                <span class="badge bg-warning text-dark mt-1">
+                                    <i class="bi bi-star-fill me-1"></i>Featured
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Title + Location (desktop) -->
+                            <div class="d-none d-lg-block mb-4">
+                                <h5 class="fw-700">{{ property.title }}</h5>
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    {{ property.location.city }},
+                                    {{ property.location.state }}
+                                </p>
+                            </div>
+
+                            <hr />
+
+                            <!-- Quick Facts -->
+                            <ul class="list-unstyled d-flex flex-column gap-2 mb-4">
+                                <li class="d-flex justify-content-between small">
+                                    <span class="text-muted">
+                                        <i class="bi bi-door-open me-2 text-primary"></i>Bedrooms
+                                    </span>
+                                    <span class="fw-600">{{ property.bedrooms }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between small">
+                                    <span class="text-muted">
+                                        <i class="bi bi-droplet me-2 text-primary"></i>Bathrooms
+                                    </span>
+                                    <span class="fw-600">{{ property.bathrooms }}</span>
+                                </li>
+                                {% if property.area_sqft %}
+                                <li class="d-flex justify-content-between small">
+                                    <span class="text-muted">
+                                        <i class="bi bi-aspect-ratio me-2 text-primary"></i>Area
+                                    </span>
+                                    <span class="fw-600">{{ property.area_sqft|floatformat:0 }} sqft</span>
+                                </li>
+                                {% endif %}
+                                <li class="d-flex justify-content-between small">
+                                    <span class="text-muted">
+                                        <i class="bi bi-house me-2 text-primary"></i>Type
+                                    </span>
+                                    <span class="fw-600 text-capitalize">{{ property.property_type }}</span>
+                                </li>
+                                {% if distance_from_city is not None %}
+                                <li class="d-flex justify-content-between small">
+                                    <span class="text-muted">
+                                        <i class="bi bi-geo me-2 text-primary"></i>From city
+                                    </span>
+                                    <span class="fw-600">{{ distance_from_city }} km</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+
+                            <!-- CTA Button -->
+                            <a
+                                href="{% url 'property_list' %}?search={{ property.location.city }}"
+                                class="btn btn-primary w-100 py-2 fw-600"
+                            >
+                                <i class="bi bi-search me-2"></i>
+                                More in {{ property.location.city }}
+                            </a>
+
+                            <a
+                                href="{% url 'property_list' %}"
+                                class="btn btn-outline-secondary w-100 py-2 mt-2"
+                            >
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Back to Listings
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 {% endblock %}

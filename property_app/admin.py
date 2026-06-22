@@ -91,6 +91,9 @@ class PropertyAdmin(gis_admin.GISModelAdmin):
         "is_active",
         "created_at",
     ]
+    
+    list_editable=("is_featured","is_active")
+    
     list_filter = [
         "property_type",
         "status",

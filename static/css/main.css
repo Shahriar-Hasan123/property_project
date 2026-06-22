@@ -345,3 +345,26 @@ body {
     color: #dee2e6;
     margin-bottom: 1rem;
 }
+
+/* ─── Property Detail ────────────────────────────────────── */
+.detail-card {
+    transition: var(--transition);
+}
+
+.detail-card:hover {
+    background-color: #e8f0fe !important;
+}
+
+.thumbnail-item {
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.thumbnail-item:hover {
+    border-color: var(--primary);
+    opacity: 0.85;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}

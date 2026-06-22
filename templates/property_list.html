@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Properties — StayFinder{% endblock %}
+{% block title %}Properties — HavenStay{% endblock %}
 {% block meta_description %}Browse all vacation rental properties. Filter by type, bedrooms, and price.{% endblock %}
 
 {% block content %}
@@ -221,10 +221,7 @@
                             <!-- Previous -->
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    
-                                        class="page-link rounded-2"
-                                        href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}"
-                                    >
+                                    <a class="page-link rounded-2" href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
@@ -238,10 +235,7 @@
                                     </li>
                                 {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
                                     <li class="page-item">
-                                        
-                                            class="page-link rounded-2"
-                                            href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}"
-                                        >
+                                        <a class="page-link rounded-2" href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}">
                                             {{ num }}
                                         </a>
                                     </li>
@@ -251,10 +245,7 @@
                             <!-- Next -->
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    
-                                        class="page-link rounded-2"
-                                        href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}"
-                                    >
+                                    <a class="page-link rounded-2" href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>

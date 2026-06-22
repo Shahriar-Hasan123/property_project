@@ -1,6 +1,26 @@
 title,description,property_type,status,price,bedrooms,bathrooms,area_sqft,address,city,state,country,latitude,longitude
-King's Castle Beach House,Luxury beach house with private pool,villa,available,450.00,6,4,3200.00,123 Beach Rd,Destin,Florida,USA,30.3935,-86.4958
-Cozy Mountain Cabin,Peaceful cabin with mountain views,cabin,available,120.00,2,1,800.00,45 Pine Ave,Asheville,North Carolina,USA,35.5951,-82.5515
-Downtown Studio Apartment,Modern studio in city center,studio,available,85.00,0,1,450.00,789 Main St,Miami,Florida,USA,25.7617,-80.1918
-Oceanfront Villa,Stunning ocean views and private beach,villa,available,800.00,5,5,4500.00,1 Ocean Drive,Miami Beach,Florida,USA,25.7907,-80.1300
-Family Cottage,Spacious cottage perfect for families,cottage,available,200.00,4,2,1800.00,22 Oak Lane,Nashville,Tennessee,USA,36.1627,-86.7816
+Ocean Breeze Villa,Luxury villa near the beach,villa,available,650.00,5,4,3600.00,101 Ocean Dr,Miami,Florida,USA,25.7617,-80.1918
+Downtown Studio,Compact studio in city center,studio,available,95.00,1,1,500.00,202 Main St,Miami,Florida,USA,25.7650,-80.1950
+Mountain Escape Cabin,Rustic cabin with mountain views,cabin,available,150.00,2,1,850.00,11 Pine Rd,Denver,Colorado,USA,39.7392,-104.9903
+Ski Resort Chalet,Chalet close to ski resorts,chalet,available,390.00,4,3,2600.00,22 Snow Peak Dr,Denver,Colorado,USA,39.7450,-104.9800
+City Center Apartment,Modern apartment near attractions,apartment,available,140.00,2,1,900.00,101 Broadway,New York,New York,USA,40.7128,-74.0060
+Luxury Penthouse,High-rise penthouse with skyline views,penthouse,available,980.00,4,4,4000.00,202 Park Ave,New York,New York,USA,40.7180,-74.0010
+Lakeside Cottage,Charming cottage beside the lake,cottage,available,210.00,3,2,1500.00,10 Lake Shore Dr,Chicago,Illinois,USA,41.8781,-87.6298
+Urban Loft,Modern loft in downtown district,apartment,available,165.00,1,1,800.00,20 Market St,Chicago,Illinois,USA,41.8820,-87.6250
+Waterfront Villa,Luxury villa near the bay,villa,available,620.00,5,4,3500.00,15 Bayview Rd,Seattle,Washington,USA,47.6062,-122.3321
+Modern Apartment,Apartment close to downtown,apartment,available,145.00,2,1,850.00,25 Pine St,Seattle,Washington,USA,47.6100,-122.3300
+Palm Tree Cottage,Cozy cottage with garden,cottage,available,180.00,3,2,1400.00,303 Palm Ave,Miami,Florida,USA,25.7580,-80.1880
+Luxury Marina Condo,Modern condo near marina,condo,available,320.00,2,2,1200.00,404 Harbor Rd,Miami,Florida,USA,25.7700,-80.1800
+Sunset Beach House,Beautiful house near beach,house,available,420.00,4,3,2400.00,505 Sunset Blvd,Miami,Florida,USA,25.7550,-80.1750
+Downtown Loft,Stylish loft in downtown area,apartment,available,170.00,1,1,750.00,33 Market St,Denver,Colorado,USA,39.7350,-104.9950
+Family Retreat House,Spacious family home,house,available,280.00,4,3,2200.00,44 Aspen Ln,Denver,Colorado,USA,39.7500,-104.9850
+Luxury Mountain Villa,Premium villa with mountain scenery,villa,available,700.00,6,5,4200.00,55 Summit Rd,Denver,Colorado,USA,39.7420,-104.9700
+Historic Townhouse,Renovated townhouse in historic area,townhouse,available,350.00,3,2,1800.00,303 Heritage St,New York,New York,USA,40.7100,-74.0100
+Business Executive Suite,Executive suite for professionals,studio,available,220.00,1,1,650.00,404 Wall St,New York,New York,USA,40.7150,-74.0040
+Central Park Residence,Luxury residence near park,condo,available,500.00,3,3,2100.00,505 Central Ave,New York,New York,USA,40.7200,-73.9980
+Luxury Condo,Upscale condo with city views,condo,available,340.00,2,2,1300.00,30 Riverwalk Ave,Chicago,Illinois,USA,41.8750,-87.6200
+Family House,Comfortable family-friendly home,house,available,260.00,4,3,2300.00,40 Oak St,Chicago,Illinois,USA,41.8700,-87.6350
+Executive Penthouse,Premium penthouse downtown,penthouse,available,850.00,4,4,3600.00,50 Skyline Blvd,Chicago,Illinois,USA,41.8850,-87.6180
+Forest Cabin,Quiet cabin near forest trails,cabin,available,175.00,2,1,950.00,35 Cedar Ln,Seattle,Washington,USA,47.6020,-122.3400
+Harbor Condo,Condo overlooking the harbor,condo,available,310.00,2,2,1200.00,45 Harbor Ave,Seattle,Washington,USA,47.6080,-122.3250
+Luxury Family Home,Spacious luxury home,house,available,450.00,5,4,3000.00,55 Evergreen Dr,Seattle,Washington,USA,47.6150,-122.3200
