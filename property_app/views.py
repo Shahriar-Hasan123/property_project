@@ -219,38 +219,15 @@ class LocationAutocompleteAPIView(APIView):
             return Response({"results": []})
 
         try:
-            # First, try keyword-based matching for exact/prefix matches
-            keyword_matches = Location.objects.filter(
-                is_active=True,
-                embedding__isnull=False,
-            ).filter(
-                Q(name__icontains=query)
-                | Q(city__icontains=query)
-                | Q(state__icontains=query)
-                | Q(country__icontains=query)
-            ).distinct()
-
-            # Then get semantic results
+            # Get semantic results
             model = get_embedding_model()
             query_embedding = model.encode(query).tolist()
 
             semantic_matches = Location.objects.filter(
                 is_active=True, embedding__isnull=False
-            ).order_by(CosineDistance("embedding", query_embedding))
+            ).order_by(CosineDistance("embedding", query_embedding))[:limit]
 
-            # Combine results: keyword matches first, then semantic matches (avoiding duplicates)
-            keyword_ids = set(keyword_matches.values_list("id", flat=True))
-            combined_results = list(keyword_matches[:limit])
-
-            # Fill remaining slots with semantic results (that aren't already in keyword matches)
-            remaining_slots = limit - len(combined_results)
-            if remaining_slots > 0:
-                semantic_only = [
-                    loc for loc in semantic_matches if loc.id not in keyword_ids
-                ][:remaining_slots]
-                combined_results.extend(semantic_only)
-
-            serializer = LocationAutocompleteSerializer(combined_results, many=True)
+            serializer = LocationAutocompleteSerializer(semantic_matches, many=True)
             return Response({"results": serializer.data})
 
         except Exception as e:

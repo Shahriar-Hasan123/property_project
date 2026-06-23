@@ -1,8 +1,6 @@
-/**
- * Semantic Location Autocomplete
- * Provides intelligent location suggestions using embeddings
- * with keyboard navigation, ARIA accessibility, and XSS protection
- */
+// Semantic Location Autocomplete
+// Provides intelligent location suggestions using embeddings with keyboard navigation, ARIA accessibility, and XSS protection
+
 
 (function () {
     const input = document.getElementById("search");
