@@ -159,47 +159,54 @@ The database automatically initializes with:
 
 ### How It Works
 
-The location autocomplete API combines two search strategies for intelligent results:
+The location autocomplete API uses **AI-powered semantic search** to find locations based on meaning, not just keyword matching:
 
-1. **Keyword Matching** (Priority):
-   - Searches location name, city, state, country for exact/prefix matches
-   - Returns matching results first
-
-2. **Semantic Search** (Fallback):
-   - Uses AI embeddings (Sentence Transformers) to understand search intent
-   - Finds semantically similar locations even if keywords don't match
-   - Example: "beach city" finds coastal locations
+- **Embedding Generation**: User query is converted to a 384-dimensional vector using Sentence Transformers (all-MiniLM-L6-v2)
+- **Similarity Matching**: Locations are ranked by cosine distance to the query embedding
+- **Fast Retrieval**: HNSW indexing on pgvector enables sub-millisecond similarity searches
+- **Example**: Searching "beach city" finds coastal locations, even if the exact words don't appear in location names
 
 ### Architecture
 
 ```
 User Query
     ↓
-Tokenization & Embedding (Sentence Transformers)
+Encode to Embedding (Sentence Transformers)
     ↓
-┌─────────────────────────────────────────┐
-│ 1. Keyword Search (name, city, state)   │ ← Fast, exact matches
-└─────────────────────────────────────────┘
+Cosine Distance Search (pgvector + HNSW Index)
     ↓
-    ├─ Results found? Return them
-    └─ Need more? Continue to semantic search
-         ↓
-    ┌──────────────────────────────────────────┐
-    │ 2. Cosine Distance (pgvector + HNSW)     │ ← Fast, semantic matches
-    └──────────────────────────────────────────┘
-    ↓
-Combine & Deduplicate Results
+Rank Results by Similarity
     ↓
 Return Top N Locations
 ```
 
-### Query Example
+### API Endpoint
 
 ```bash
 # Semantic search for "beach"
 curl "http://localhost:8000/api/locations/autocomplete/?q=beach&limit=5"
 
-# Result: Returns coastal/island locations even if name doesn't contain "beach"
+# Response example:
+{
+  "results": [
+    {
+      "id": 1,
+      "name": "Miami Beach",
+      "city": "Miami",
+      "state": "Florida",
+      "country": "USA"
+    },
+    ...
+  ]
+}
+```
+
+### Query Parameters
+
+- **q** (required): Search query (minimum 2 characters)
+- **limit** (optional): Maximum results to return (default: 5, max: 10)
+
+### Result: Returns coastal/island locations even if name doesn't contain "beach"
 ```
 
 ### Performance
