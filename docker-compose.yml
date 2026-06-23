@@ -1,44 +1,60 @@
 services:
-
-  postgres:
+  db:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.postgres
-    container_name: property_postgres
-    env_file:
-      - .env
+      context: ./docker
+      dockerfile: Dockerfile.postgres
+    image: property_postgis_pgvector:16
+    container_name: property_db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DB: ${DB_NAME:-propertydb}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "5442:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-extensions.sql:/docker-entrypoint-initdb.d/01_init-extensions.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-propertydb}"]
+      interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - property_network
 
-  django:
+  web:
     build:
       context: .
       dockerfile: docker/Dockerfile.django
-    container_name: property_django
-    user: "${USER_ID}:${GROUP_ID}"
+    image: property_django:latest
+    container_name: property_web
+    restart: unless-stopped
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
       - media_volume:/app/media
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      DEBUG: ${DEBUG:-True}
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+      DB_NAME: ${DB_NAME:-propertydb}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: db
+      DB_PORT: 5432
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
+    networks:
+      - property_network
 
 volumes:
   postgres_data:
   media_volume:
+
+networks:
+  property_network:
+    driver: bridge

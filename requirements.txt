@@ -6,3 +6,4 @@ Pillow==11.1.0
 django-filter==24.3
 pandas==2.2.3
 python-dotenv==1.0.1
+sentence-transformers==3.3.1
