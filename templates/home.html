@@ -43,17 +43,28 @@
                     </h5>
                     <form action="{% url 'property_list' %}" method="GET">
 
-                        <!-- Location -->
-                        <div class="mb-3">
-                            <label for="search">Location</label>
+
+                        <!-- Location with semantic autocomplete -->
+                        <div class="mb-3 position-relative">
+                            <label for="search">
+                                <i class="bi bi-stars me-1"></i>Location
+                                <span class="ms-1 opacity-75" style="font-size:0.75rem;">
+                                    (AI-powered)
+                                </span>
+                            </label>
                             <input
                                 type="text"
                                 id="search"
                                 name="search"
                                 class="form-control"
-                                placeholder="City, state or country..."
+                                placeholder='Try "beachside city" or "mountain town"...'
                                 autocomplete="off"
                             />
+                            <!-- Autocomplete dropdown renders here -->
+                            <div id="autocompleteDropdown"
+                                class="list-group shadow position-absolute w-100"
+                                style="z-index:1000; top:100%; left:0; display:none;">
+                            </div>
                         </div>
 
                         <div class="row g-3 mb-3">
@@ -196,4 +207,8 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/autocomplete.js' %}"></script>
 {% endblock %}

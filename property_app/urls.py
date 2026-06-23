@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path("properties/", views.property_list, name="property_list"),       # Feature 7
-    path("properties/<slug:slug>/", views.property_detail, name="property_detail"),  # Feature 9
+    path("properties/", views.property_list, name="property_list"),
+    path("properties/<slug:slug>/", views.property_detail, name="property_detail"),
+    path("api/locations/autocomplete/",views.LocationAutocompleteAPIView.as_view(),name="location_autocomplete",),
 ]
